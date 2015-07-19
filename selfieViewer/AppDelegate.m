@@ -1,22 +1,23 @@
 //
 //  AppDelegate.m
-//  sefieViewer
+//  selfieViewer
 //
 //  Created by Paul King on 7/18/15.
 //  Copyright (c) 2015 Paul King. All rights reserved.
 //
 
 #import "AppDelegate.h"
+#import "PDKInstagramStore.h"
 
 @interface AppDelegate ()
-
+@property (nonatomic, strong) PDKInstagramStore *instagram;
 @end
 
 @implementation AppDelegate
 
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    _instagram = [PDKInstagramStore sharedStore];
     return YES;
 }
 
@@ -28,6 +29,7 @@
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+    [_instagram.collection removeAllObjects];
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {

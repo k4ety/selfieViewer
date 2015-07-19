@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:sefieViewer.xcodeproj">
+      location = "self:/Users/paulking/Documents/workspace/sefieViewer/selfieViewer.xcodeproj">
    </FileRef>
 </Workspace>

@@ -1,6 +1,6 @@
 //
-//  sefieViewerTests.m
-//  sefieViewerTests
+//  selfieViewerTests.m
+//  selfieViewerTests
 //
 //  Created by Paul King on 7/18/15.
 //  Copyright (c) 2015 Paul King. All rights reserved.
@@ -9,11 +9,11 @@
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
-@interface sefieViewerTests : XCTestCase
+@interface selfieViewerTests : XCTestCase
 
 @end
 
-@implementation sefieViewerTests
+@implementation selfieViewerTests
 
 - (void)setUp {
     [super setUp];
