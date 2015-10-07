@@ -18,6 +18,9 @@
 
 @interface PDKInstagramStore () <UIWebViewDelegate>
 @property (nonatomic, strong) NSMutableData *jsonData;
+
+@property (nonatomic) int banned;
+@property (nonatomic, strong) NSString *bannedTags;
 @property (nonatomic, strong) NSMutableDictionary *jsonObject;
 @property (nonatomic, strong) NSURLConnection *connection;
 @property (nonatomic, strong) NSArray *jsonKeys;
@@ -50,6 +53,8 @@
     self = [super init];
     _backgroundQueue = dispatch_queue_create("com.k4ety.selfieViewer.queue", DISPATCH_QUEUE_CONCURRENT);
     _collection = [NSMutableArray new];
+    
+    _bannedTags = @"dm chat facetime follow follow4follow followforfollow instalikes kik like4like snapchat victoriasecret";
 return self;
 }
 
@@ -91,7 +96,7 @@ return self;
             [[NSNotificationCenter defaultCenter] postNotificationName:@"gotUserToken" object:nil];
         }
     } else {
-//        NSLog(@"%@", request);
+        NSLog(@"%@", request);
         NSRange tokenParm = [urlString rangeOfString: @"next=/oauth/authorize/"];
         if (tokenParm.location != NSNotFound) {
             [_view addSubview:_webView];
@@ -102,12 +107,12 @@ return self;
 
 -(void)webViewDidStartLoad:(UIWebView *)webView
 {
-//    NSLog(@"%@", webView);
+    NSLog(@"%@", webView);
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView
 {
-//    NSLog(@"%@", webView);
+    NSLog(@"%@", webView);
 }
 
 #pragma mark - Instagram API code
@@ -120,7 +125,10 @@ return self;
 -(void)getMorePics
 {
     if (_pagination) {
-//        NSLog(@"pagination: %@\n%@",  [_pagination.allKeys componentsJoinedByString:@","], _pagination);
+        if (_banned) {
+            NSLog("Banned %d/%lu", _banned, (unsigned long)_collection.count + _banned);
+        }
+        NSLog(@"pagination: %@\n%@",  [_pagination.allKeys componentsJoinedByString:@","], _pagination);
         NSString *query = _pagination[@"next_url"];
         _pagination = nil;
         [self queryJSON:query];
@@ -133,7 +141,7 @@ return self;
     _jsonObject = [[NSMutableDictionary alloc] init];
     
     NSURL *url = [NSURL URLWithString:[urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-//    NSLog(@"\n  %@", url);
+    NSLog(@"\n  %@", url);
     
     NSURLRequest *req = [NSURLRequest requestWithURL:url];
     NSURLConnection *conn = [[NSURLConnection alloc] initWithRequest:req delegate:self startImmediately:YES];
@@ -159,7 +167,7 @@ return self;
     
     if (_jsonObject) {
         _jsonKeys = [_jsonObject.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-//        NSLog(@"\nJSON keys: %@", [_jsonKeys componentsJoinedByString:@","]);
+        NSLog(@"\nJSON keys: %@", [_jsonKeys componentsJoinedByString:@","]);
         
 #pragma mark - Parse JSON results from instagram
         if (_jsonObject[@"meta"][@"error_message"]) {
@@ -211,17 +219,25 @@ return self;
             NSDictionary *lowRes = images[@"low_resolution"];
             NSDictionary *standard = images[@"standard_resolution"];
             NSDictionary *thumbnail = images[@"thumbnail"];
+            NSArray *tags = post[@"tags"];
             
-            NSDictionary *caption = post[@"caption"];
+            NSDictionary *captionInfo = post[@"caption"];
             NSDictionary *user = post[@"user"];
             
             PDKSelfie *selfie = [PDKSelfie new];
             selfie.userName = user[@"username"];
             selfie.fullName = user[@"full_name"];
+            selfie.tags = tags;
 
-            if (![caption isKindOfClass:[NSNull class]]) {
-                selfie.caption = caption[@"text"];
-                selfie.link = caption[@"link"];
+            NSString *caption;
+            if (![captionInfo isKindOfClass:[NSNull class]]) {
+                caption = captionInfo[@"text"];
+                NSArray *captionArray = [captionInfo[@"text"] componentsSeparatedByString:@"#"];
+                if (captionArray.count) {
+                    caption = captionArray[0];
+                }
+                selfie.caption = caption;
+                selfie.link = captionInfo[@"link"];
             }
             selfie.standard = [PDKSelfiePic new];
             selfie.standard.height = standard[@"height"];
@@ -243,12 +259,17 @@ return self;
             selfie.thumbnail.url = thumbnailurl;
             selfie.thumbnail.image = [strongSelf getImageFromURL:thumbnailurl];
             
-            if (![selfie.caption isEqualToString:@"#dm #selfie #girl"]) {   // Get rid of a bit of spam
-                [_collection addObject:selfie];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[NSNotificationCenter defaultCenter] postNotificationName:@"gotSelfie" object:nil];
-                });
+            for (NSString *tag in selfie.tags) {
+                if ([_bannedTags containsString:tag]) {
+                    _banned++;
+                    return;
+                }
             }
+
+            [_collection addObject:selfie];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"gotSelfie" object:nil];
+            });
         });
     }
 }

@@ -13,6 +13,7 @@
 @property (nonatomic, strong) NSString *userName;
 @property (nonatomic, strong) NSString *fullName;
 @property (nonatomic, strong) NSString *caption;
+@property (nonatomic, strong) NSArray *tags;
 @property (nonatomic, strong) NSString *link;
 @property (nonatomic, strong) PDKSelfiePic *standard;
 @property (nonatomic, strong) PDKSelfiePic *lowRes;

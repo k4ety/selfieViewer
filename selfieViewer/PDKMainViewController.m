@@ -138,7 +138,6 @@
     PDKCollectionViewCell *cell = sender;
     PDKSelfie *selfie = cell.selfie;
     enlargeVC.selfie = selfie;
-//    NSArray *tags = [selfie.caption componentsSeparatedByString:@"#"];
-//    NSLog(@"\nselfie: %@\n  %@\n  %@\n  %@\n  %lu\n", selfie.userName, selfie.fullName, selfie.caption, selfie.link, (unsigned long)tags.count);
+    NSLog(@"\nselfie: %@ (%@):%@\n  %@", selfie.userName, selfie.fullName, selfie.caption, [selfie.tags componentsJoinedByString:@", "]);
 }
 @end

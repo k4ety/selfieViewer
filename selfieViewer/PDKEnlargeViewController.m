@@ -54,7 +54,11 @@
 
 - (void)viewDidAppear:(BOOL)animated
 {
-    _imageView.image = _selfie.standard.image;
+    if (_selfie.standard.image) {
+        _imageView.image = _selfie.standard.image;
+    } else {
+        _imageView.image = _selfie.lowRes.image;
+    }
 }
 
 - (void)viewDidDisappear:(BOOL)animated
